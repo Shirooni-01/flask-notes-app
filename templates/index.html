@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>notes app</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        body {
+            background: #f4f6f9;
+            max-width: 900px;
+            margin: auto;
+            padding: 30px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        button {
+            cursor: pointer;
+        }
+
+        #newnote,
+        #searchnote {
+            padding: 10px 18px;
+            border: none;
+            border-radius: 8px;
+            background: #007bff;
+            color: white;
+            margin-right: 10px;
+            margin-bottom: 15px;
+        }
+
+        #newnote:hover,
+        #searchnote:hover {
+            background: #0056b3;
+        }
+
+        form {
+            margin-bottom: 15px;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+        }
+
+        #submit,
+        #searchsubmit,
+        .submiteditednote {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 8px;
+        }
+
+        .titleslist {
+            background: white;
+            padding: 12px;
+            margin-top: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .titleslist:hover {
+            transform: translateX(5px);
+        }
+
+        .noteslist {
+            background: white;
+            margin-top: 5px;
+            padding: 15px;
+            border-left: 4px solid #007bff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .note {
+            margin: 10px 0;
+            color: #444;
+        }
+
+        .time {
+            font-size: 12px;
+            color: gray;
+        }
+
+        .editnote {
+            background: #ffc107;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+        }
+
+        .deletenote {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+        }
+
+        .editnote_form {
+            margin-top: 10px;
+        }
+
+        .searchednote {
+            background: #d4edda;
+            border-left: 5px solid #28a745;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+        }
+    </style>
+
+    <link href="https://jsdelivr.net" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+</head>
+
+<body>
+    <h1>Your Notes</h1>
+    <button id="newnote"> New </button>
+    <button id="searchnote"> Search </button>
+    <form method="POST" id="noteform" style="display: none;">
+        <input type="text" name="title" id="title" placeholder="TITLE">
+        <input type="text" name="note" id="note" placeholder="Write here">
+        <button type="submit" id="submit"> Save </button>
+    </form>
+
+    <form method="POST" id="searchform" style="display: none;">
+        <input type="text" name="search" id="search" placeholder="Search title">
+        <button type="submit" id="searchsubmit"> Search </button>
+    </form>
+
+    {% if searchednote %}
+    <div class="searchednote">
+        <p class="title">{{searchednote.title}}</p>
+        <p class="note">{{searchednote.note}}</p>
+        <p class="time">{{searchednote.time}}</p>
+    </div>
+    {% endif %}
+
+    {%for note in notes%}
+    <div class="titleslist">
+        <p class="title">{{note.title}}</p>
+    </div>
+    <div class="noteslist" style="display: none;">
+        <button class="editnote"> Edit </button>
+        <form method="post" class="deletenote_form">
+            <input type="hidden" name="index_del" id="index" value="{{loop.index0}}">
+            <button class="deletenote" name="delete" value="Delete" type="submit"> delete </button>
+        </form>
+        <form method="post" class="editnote_form" style="display: none;">
+            <input type="hidden" name="index" id="index" value="{{loop.index0}}">
+            <input type="text" name="editedtitle" id="editedtitle" placeholder="New title ">
+            <input type="text" name="editednote" id="editednote" placeholder="New note ">
+            <button type="submit" class="submiteditednote"> Save </button>
+        </form>
+        <p class="note">{{note.note}}</p>
+        <p class="time">
+            {{ note.time }}
+        </p>
+    </div>
+
+
+    {%endfor%}
+
+
+
+
+
+    <script src="https://jsdelivr.net"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
+    <script>
+
+        let addnewnote = document.querySelector('#newnote')
+        let noteform = document.querySelector('#noteform')
+        let save = document.querySelector('#submit')
+        let titleslist = document.querySelectorAll('.titleslist')
+        let noteslist = document.querySelectorAll('.noteslist')
+
+        let editnote = document.querySelectorAll('.editnote')
+        let editform = document.querySelectorAll('.editnote_form')
+        let editedtitle = document.querySelector('#editedtitle')
+        let editednote = document.querySelector('#editednote')
+
+
+        let searchnote = document.querySelector('#searchnote')
+        let searchform = document.querySelector('#searchform')
+        let search = document.querySelector('#search')
+        let searchsubmit = document.querySelector('#searchsubmit')
+        let searchednote = document.querySelector('.searchednote')
+
+
+        addnewnote.addEventListener('click', () => {
+            noteform.style.display = 'block'
+        })
+
+        searchnote.addEventListener('click', () => {
+            searchform.style.display = 'block'
+        })
+
+        titleslist.forEach((title, index) => {
+            title.addEventListener('click', () => {
+                noteslist.forEach(note => {
+                    note.style.display = 'none'
+                })
+                noteslist[index].style.display = 'block'
+            })
+        })
+
+        editnote.forEach((button, index) => {
+            button.addEventListener('click', () => {
+                editform[index].style.display = 'block'
+            })
+        })
+
+    </script>
+</body>
+
+</html>
